@@ -476,7 +476,7 @@ export default function DragonPage() {
         height: '200px'
       }}>
         <img 
-          src="/hero.jpg" 
+          src="/hero.png" 
           alt="Hero" 
           style={{ 
             width: '100%', 
