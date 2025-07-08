@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt,useConfig } from 'wagmi';
+import { readContract } from '@wagmi/core'
 import { DRAGON_ADDRESS, DRAGON_ABI, WEAPON_NFT_ADDRESS, WEAPON_NFT_ABI } from '../utils/constants';
 import Link from 'next/link';
 import { createThirdwebClient,getContract } from 'thirdweb';
 import WeaponCard from '../components/WeaponCard';
 import { monadTestnet } from "thirdweb/chains";
+import { config } from 'process';
 
 export default function DragonPage() {
+  const WagmiConfig = useConfig()
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [selectedWeapons, setSelectedWeapons] = useState([]);
@@ -17,6 +20,38 @@ export default function DragonPage() {
   const { address, isConnected } = useAccount();
   const [remain, setRemain] = useState(0);
   const gap12h = 12 * 60 * 60; // 12 hours in milliseconds
+
+  const fetchTokenURIs = async (tokenIds) => {
+    const svgs = {};
+    
+    for (const tokenId of tokenIds) {
+      try {
+        // 获取tokenURI
+        const tokenURI = await readContract(WagmiConfig, {
+          address: WEAPON_NFT_ADDRESS,
+          abi: WEAPON_NFT_ABI,
+          functionName: 'tokenURI',
+          args: [tokenId],
+        });
+
+        // 处理base64编码的tokenURI
+        if (tokenURI.startsWith('data:application/json;base64,')) {
+          const base64Data = tokenURI.split(',')[1];
+          const decodedString = atob(base64Data);
+          const metaData = JSON.parse(decodedString);
+
+          // 处理SVG图像
+          if (metaData.image && metaData.image.startsWith('data:image/svg+xml;base64,')) {
+            const imageData = metaData.image.split(',')[1];
+            svgs[tokenId] = atob(imageData);
+          }
+        }
+      } catch (err) {
+        console.error(`Error fetching tokenURI for token ${tokenId}:`, err);
+      }
+    }
+    return svgs;
+  };
 
   // Fetch owned weapons using thirdweb
   useEffect(() => {
@@ -50,20 +85,7 @@ export default function DragonPage() {
         setOwnedWeapons(tokenIds);
         
         // Get SVGs for each weapon
-        const svgs = {};
-        for (const nft of nfts.data) {
-          const tokenId = Number(nft.token_id);
-          if (nft.metadata_url) {
-            const base64Data = nft.metadata_url.split(',')[1];
-  
-            const decodedString = atob(base64Data);
-            
-            const metaData = JSON.parse(decodedString);
-
-            const imageData = metaData.image.split(',')[1];
-            svgs[tokenId] = atob(imageData);
-          }
-        }
+        const svgs = await fetchTokenURIs(tokenIds);
         setWeaponSvgs(svgs);
       } catch (err) {
         console.error("Error fetching weapons:", err);
@@ -106,6 +128,7 @@ export default function DragonPage() {
     args: [address],
     watch: true,
   });
+
 
   // Calculate health percentage
   const healthPercentage = currentHP && initialHP 
@@ -297,7 +320,7 @@ export default function DragonPage() {
                         alignItems: 'center',
                         margin: '0.5rem 0',
                         maxWidth: '100%',
-                        height: '100px'
+                        height: '120px'
                       }}
                     />
                   ) : (
