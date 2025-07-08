@@ -19,6 +19,7 @@ export default function DragonPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { address, isConnected } = useAccount();
   const [remain, setRemain] = useState(0);
+  const [heroSlideActive, setHeroSlideActive] = useState(false);
   const gap12h = 12 * 60 * 60; // 12 hours in milliseconds
 
   const fetchTokenURIs = async (tokenIds) => {
@@ -121,7 +122,7 @@ export default function DragonPage() {
     watch: true,
   });
 
-  const { data: playInfo } = useReadContract({
+  const { data: playInfo, refetch: refetchPlayerInfo } = useReadContract({
     address: DRAGON_ADDRESS,
     abi: DRAGON_ABI,
     functionName: 'players',
@@ -240,8 +241,14 @@ export default function DragonPage() {
   useEffect(() => {
     if (isAttackTxSuccess) {
       refetchHp(); // Refetch HP after successful attack
+      refetchPlayerInfo(); // Refetch player info to update remaining time
       setStatus('Attack successful! 🎉');
       setError('');
+      // Trigger hero slide animation
+      setHeroSlideActive(true);
+      setTimeout(() => {
+        setHeroSlideActive(false);
+      }, 800); // Reset after animation duration
     }
   }, [isAttackTxSuccess,refetchHp]);
 
@@ -494,9 +501,10 @@ export default function DragonPage() {
         position: 'absolute', 
         bottom: '0', 
         left: '50%', 
-        transform: 'translateX(-50%)',
+        transform: `translateX(-50%) ${heroSlideActive ? 'translateX(100px)' : 'translateX(0)'}`,
         width: '200px',
-        height: '200px'
+        height: '200px',
+        transition: 'transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
       }}>
         <img 
           src="/hero.png" 
@@ -505,7 +513,7 @@ export default function DragonPage() {
             width: '100%', 
             height: '100%',
             objectFit: 'contain',
-            filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.7))'
+            filter: `drop-shadow(0 0 10px rgba(255,255,255,0.7)) ${heroSlideActive ? 'drop-shadow(0 0 20px rgba(255,255,0,0.9))' : ''}`
           }} 
         />
       </div>
