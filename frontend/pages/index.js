@@ -9,6 +9,7 @@ export default function Home() {
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showTooltip, setShowTooltip] = useState(false);
   const weaponSvgs = [L1_WEAPON_SVG, L2_WEAPON_SVG, L3_WEAPON_SVG, L4_WEAPON_SVG, L5_WEAPON_SVG];
   
   const { address, isConnected } = useAccount();
@@ -99,7 +100,7 @@ export default function Home() {
           <ConnectButton />
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '1rem 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', margin: '1rem 0' }}>
           <button 
             className="button"
             onClick={() => window.location.href = '/dragon'}
@@ -116,6 +117,91 @@ export default function Home() {
           >
             Battle Dragon 🐉
           </button>
+          
+          <div style={{ position: 'relative', display: 'inline-block' }}>
+            <div 
+              style={{
+                width: '20px',
+                height: '20px',
+                borderRadius: '50%',
+                backgroundColor: '#4CAF50',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                border: '2px solid #fff',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              }}
+              onMouseEnter={() => setShowTooltip(true)}
+              onMouseLeave={() => setShowTooltip(false)}
+            >
+              ?
+            </div>
+            
+            {showTooltip && (
+              <div style={{
+                position: 'absolute',
+                top: '30px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                backgroundColor: 'rgba(15, 23, 42, 0.95)',
+                color: 'white',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '12px',
+                fontSize: '0.875rem',
+                zIndex: 1000,
+                boxShadow: '0 10px 40px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2)',
+                width: '360px',
+                whiteSpace: 'normal',
+                lineHeight: '1.5',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)'
+              }}>
+                <div style={{ 
+                  marginBottom: '0.75rem', 
+                  fontWeight: '600', 
+                  fontSize: '0.95rem',
+                  color: '#60A5FA',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+                  paddingBottom: '0.5rem'
+                }}>
+                  🎮 Gameplay Guide
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <span style={{ color: '#34D399', fontSize: '0.75rem', marginTop: '0.1rem' }}>⚔️</span>
+                    <span>Weapons auto-upgrade every 24 hours</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <span style={{ color: '#F59E0B', fontSize: '0.75rem', marginTop: '0.1rem' }}>🕐</span>
+                    <span>Attack boss every 12 hours</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <span style={{ color: '#EF4444', fontSize: '0.75rem', marginTop: '0.1rem' }}>💥</span>
+                    <span>Deal damage and earn small rewards</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                    <span style={{ color: '#A855F7', fontSize: '0.75rem', marginTop: '0.1rem' }}>🏆</span>
+                    <span>Defeat boss for generous rewards</span>
+                  </div>
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: '0',
+                  height: '0',
+                  borderLeft: '6px solid transparent',
+                  borderRight: '6px solid transparent',
+                  borderBottom: '6px solid rgba(15, 23, 42, 0.95)'
+                }}></div>
+              </div>
+            )}
+          </div>
         </div>
 
         <WeaponCard weaponSvg={weaponSvgs[currentIndex]} />
